@@ -1,116 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Button from 'react-bootstrap/Button';
+import React, { useState } from 'react';
+import { Container, Form, Button } from 'react-bootstrap';
 
 const DosageCalculator = () => {
-  const [hayvanTuru, setHayvanTuru] = useState('');
-  const [kilo, setKilo] = useState(0);
-  const [ilacAdi, setIlacAdi] = useState('');
-  const [doz, setDoz] = useState(null);
-  const [ilacSecenekleri, setIlacSecenekleri] = useState([]); // State to store medication options
+  const [animalType, setAnimalType] = useState('cat');
+  const [antibioticType, setAntibioticType] = useState('amoksisilin'); // Default to Amoksisilin
+  const [weight, setWeight] = useState('');
+  const [frequency, setFrequency] = useState('');
+  const [dosage, setDosage] = useState('');
 
-  const dozajRehberi = {
-    "kedi": {
-      "ilac1": {"mg/kg": 0.5, "min_doz": 10, "max_doz": 50},
-      "ilac2": {"mg/kg": 1.0, "min_doz": 20, "max_doz": 100},
-    },
-    "köpek": {
-      "ilac1": {"mg/kg": 0.25, "min_doz": 5, "max_doz": 25},
-      "ilac2": {"mg/kg": 0.5, "min_doz": 10, "max_doz": 50},
-    },
-    "gine_pig": {
-      "ilac1": {"mg/kg": 1.0, "min_doz": 2, "max_doz": 10},
-      "ilac2": {"mg/kg": 2.0, "min_doz": 4, "max_doz": 20},
-    },
-    "hamster": {
-      "ilac1": {"mg/kg": 2.0, "min_doz": 1, "max_doz": 5},
-      "ilac2": {"mg/kg": 4.0, "min_doz": 2, "max_doz": 10},
-    },
-    "papağan": {
-      "ilac1": {"mg/kg": 0.1, "min_doz": 0.5, "max_doz": 2},
-      "ilac2": {"mg/kg": 0.2, "min_doz": 1, "max_doz": 4},
-    },
-    "muhabbet_kuşu": {
-      "ilac1": {"mg/kg": 0.05, "min_doz": 0.25, "max_doz": 1},
-      "ilac2": {"mg/kg": 0.1, "min_doz": 0.5, "max_doz": 2},
-    },
-    "tavşan": {
-      "ilac1": {"mg/kg": 0.5, "min_doz": 10, "max_doz": 50},
-      "ilac2": {"mg/kg": 1.0, "min_doz": 20, "max_doz": 100},
-    },
+  const calculateDosage = () => {
+    // Example: Assuming Amoksisilin dosage for cats
+    // You can add more logic here based on the selected antibiotic and animal type
+    let calculatedDosage = 0;
+    if (animalType === 'cat') {
+      switch (antibioticType) {
+        case 'amoksisilin':
+          calculatedDosage = (parseFloat(weight) * 10).toFixed(2); // 10 mg/kg/day
+          break;
+        // Add other cases for different antibiotics
+        default:
+          break;
+      }
+    } else if (animalType === 'dog') {
+      // Similar logic for dogs
+    }
+    setDosage(calculatedDosage);
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!dozajRehberi.hasOwnProperty(hayvanTuru)) {
-      alert(`Hatalı hayvan türü: ${hayvanTuru}`);
-      return;
-    }
-
-    const ilacBilgileri = dozajRehberi[hayvanTuru][ilacAdi];
-    const hesaplananDoz = kilo * ilacBilgileri["mg/kg"];
-
-    let minDoz = ilacBilgileri["min_doz"]; 
-    let maxDoz = ilacBilgileri["max_doz"];
-    
-
-    if (hesaplananDoz < minDoz) {
-      hesaplananDoz = minDoz;
-    } else if (hesaplananDoz > maxDoz) {
-      hesaplananDoz = maxDoz;
-    }
-
-    setDoz(hesaplananDoz.toFixed(2));
-  };
-
-  // Update medication options whenever the animal type changes
-  useEffect(() => {
-    if (dozajRehberi.hasOwnProperty(hayvanTuru)) {
-      setIlacSecenekleri(Object.keys(dozajRehberi[hayvanTuru]));
-      setIlacAdi(Object.keys(dozajRehberi[hayvanTuru])[0]); // Set initial medication
-    } else {
-      setIlacSecenekleri([]); // Clear options upon invalid animal selection
-    }
-  }, [hayvanTuru]); // <-- Missing semicolon?
 
   return (
-    <div className="container">
-      <h1>Dozaj Hesap Makinesi</h1>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="hayvanTuru">
-          <Form.Label>Hayvan Türü:</Form.Label>
-          <Form.Select value={hayvanTuru} onChange={(e) => setHayvanTuru(e.target.value)}>
-            {Object.keys(dozajRehberi).map((hayvan) => (
-              <option key={hayvan}>{hayvan}</option>
-            ))}
-          </Form.Select>
+    <Container>
+      <h1>Antibiotic Dosage Calculator</h1>
+      <Form>
+        <Form.Group controlId="animalType">
+          <Form.Label>Animal Type</Form.Label>
+          <Form.Control
+            as="select"
+            value={animalType}
+            onChange={(e) => setAnimalType(e.target.value)}
+          >
+            <option value="cat">Cat</option>
+            <option value="dog">Dog</option>
+          </Form.Control>
         </Form.Group>
-        <Form.Group className="mb-3" controlId="kilo">
-          <Form.Label>Kilo (kg):</Form.Label>
-          <InputGroup>
-            <Form.Control type="number" value={kilo} onChange={(e) => setKilo(e.target.value)} />
-          </InputGroup>
-        </Form.Group> 
-        <Form.Group className="mb-3" controlId="ilacAdi">
-          <Form.Label>İlaç Adı:</Form.Label>
-          <Form.Select value={ilacAdi} onChange={(e) => setIlacAdi(e.target.value)}>
-            {ilacSecenekleri.map((ilac) => (
-              <option key={ilac}>{ilac}</option>
-            ))}
-          </Form.Select>
+        <Form.Group controlId="antibioticType">
+          <Form.Label>Antibiotic Type</Form.Label>
+          <Form.Control
+            as="select"
+            value={antibioticType}
+            onChange={(e) => setAntibioticType(e.target.value)}
+          >
+            <option value="amoksisilin">Amoksisilin</option>
+            {/* Add other antibiotic options */}
+          </Form.Control>
         </Form.Group>
-        <Form.Group>
-          <Button type="submit">Hesapla</Button>
+        <Form.Group controlId="weight">
+          <Form.Label>Weight (kg)</Form.Label>
+          <Form.Control
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+          />
         </Form.Group>
-        {doz && (
-          <p>
-            {hayvanTuru} için {ilacAdi} dozu: {doz} mg
-          </p>
-        )}
+
+        <Form.Group controlId="frequency">
+          <Form.Label>Dosage Frequency (hours)</Form.Label>
+          <Form.Control
+            type="number"
+            value={frequency}
+            onChange={(e) => setFrequency(e.target.value)}
+          />
+        </Form.Group>
+        <Button variant="primary" onClick={calculateDosage}>
+          Calculate Dosage
+        </Button>
       </Form>
-    </div>
+      {dosage && (
+        <p>
+          Recommended Dosage for {animalType}: <strong>{dosage} mg/day</strong>
+        </p>
+      )}
+    </Container>
   );
 };
 
